@@ -106,4 +106,3 @@ class CatFilmFont:
 if __name__ == '__main__':
     _object = CatFilmFont()
     _object.process()
-

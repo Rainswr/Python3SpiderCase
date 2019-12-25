@@ -106,4 +106,4 @@ def get_font_data() -> list:
     return info
 
 
-print(get_font_data())
+# print(get_font_data())
