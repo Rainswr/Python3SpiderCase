@@ -23,12 +23,12 @@ class CatFilmFont:
                           "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0"
                           ".3359.139 Safari/537.36 "}
 
-    def save_font(self, woff_url) -> None:
+    @staticmethod
+    def save_font(font_content) -> None:
         """
-        存woff字体文件
+        存woff/ttf字体文件
         :return:
         """
-        font_content = requests.get(woff_url, headers=self.headers).content
         with open(f'..\\CatFilmCrawl\\font\\web.woff', 'wb') as f:
             f.write(font_content)
 
@@ -67,7 +67,7 @@ class CatFilmFont:
     @staticmethod
     def parse_fields(text: str):
         """
-        解析字体
+        解析内容，可修改
         :param text:
         :return:
         """
@@ -86,21 +86,32 @@ class CatFilmFont:
             }
             print(film_dict)
 
-    def process(self):
+    def flow(self, resp, woff_content):
         """
+        主流程
+        :param resp:
+        :param woff_content:
         :return:
         """
-        r = requests.get('https://maoyan.com/board/1', headers=self.headers)
-        woff_path = re.search(r"vfile(.*?)woff", r.text).group()
-        woff_url = f"https://{woff_path}"
         # 获取加密字真实值
-        uni_dict = self.get_uni_num(woff_url)
-        text = r.text
+        uni_dict = self.get_uni_num(woff_content)
+        text = resp.text
         # 替换加密字为真实值
         for key in uni_dict:
             text = text.replace(key, uni_dict[key])
         # 解析字段
         self.parse_fields(text)
+
+    def process(self):
+        """
+        入口 ，可以修改
+        :return:
+        """
+        r = requests.get('https://maoyan.com/board/1', headers=self.headers)
+        woff_path = re.search(r"vfile(.*?)woff", r.text).group()
+        woff_url = f"https://{woff_path}"
+        font_content = requests.get(woff_url, headers=self.headers).content
+        self.flow(r, font_content)
 
 
 if __name__ == '__main__':
