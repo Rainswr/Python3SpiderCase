@@ -27,14 +27,13 @@ class GoodRentFont:
             }
 
     @staticmethod
-    def save_font(woff_font) -> None:
+    def save_font(font_content) -> None:
         """
-        存woff字体文件
+        存woff/ttf字体文件
         :return:
         """
-        woff_content = base64.b64decode(woff_font)
         with open(f'..\\GoodRent\\font\\web.woff', 'wb') as f:
-            f.write(woff_content)
+            f.write(font_content)
 
     @staticmethod
     def get_xy_info(web_font) -> list:
@@ -52,14 +51,14 @@ class GoodRentFont:
             info.append(coors)  # [[true1,x,y,...], [true2,x,y,...],...]
         return info
 
-    def get_uni_num(self, woff_font):
+    def get_uni_num(self, woff_content):
         """
         返回加密字体映射{'&#f3ad': 3, '&#ec25': 5, ...}
-        :param woff_font: woff加密字体
+        :param woff_content: woff加密字体
         :return:
         """
         uni_dict = {}
-        self.save_font(woff_font)
+        self.save_font(woff_content)
         web_font = TTFont('..\\GoodRent\\font\\web.woff')
         web_xy = self.get_xy_info(web_font)
         true_font = get_true_value(web_xy)
@@ -71,7 +70,7 @@ class GoodRentFont:
     @staticmethod
     def parse_fields(text: str):
         """
-        解析字体
+        解析内容，可以修改
         :param text:
         :return:
         """
@@ -93,8 +92,25 @@ class GoodRentFont:
             }
             print(rent_data)
 
+    def flow(self, resp, woff_content):
+        """
+        主流程
+        :param resp:
+        :param woff_content:
+        :return:
+        """
+        # 获取加密字真实值
+        uni_dict = self.get_uni_num(woff_content)
+        text = resp.text
+        # 替换加密字为真实值
+        for key in uni_dict:
+            text = text.replace(key, uni_dict[key])
+        # 解析字段
+        self.parse_fields(text)
+
     def process(self):
         """
+        入口 ，可以修改
         :return:
         """
         detail_url = 'https://www.haozu.com/bj/house-list/?' \
@@ -102,14 +118,8 @@ class GoodRentFont:
         r = requests.get(
             detail_url, headers=self.headers)
         woff_font = re.search(r'base64,(.*?)\)', r.text).group(1)
-        # 获取加密字真实值
-        uni_dict = self.get_uni_num(woff_font)
-        text = r.text
-        # 替换加密字为真实值
-        for key in uni_dict:
-            text = text.replace(key, uni_dict[key])
-        # 解析字段
-        self.parse_fields(text)
+        woff_content = base64.b64decode(woff_font)
+        self.flow(r, woff_content)
 
 
 if __name__ == '__main__':
