@@ -6,6 +6,3 @@
 ### 二、依赖包
 - python调用js三种方式：要么还原js；要么通过execjs脚本执行；要么通过node布服务执行；
 - python安装Cryptojs的库：`pip install pycryptodome`
-```
-pip install pycryptodome
-```
