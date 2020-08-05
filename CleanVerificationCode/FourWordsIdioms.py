@@ -31,6 +31,7 @@ class CleanIdiomsCode:
         :param valid_rgb_dict: 已保留的有效rgb
         :return: 二值化后的Image对象
         """
+        im = im.convert('RGB')
         for x in range(im.size[0]):
             for y in range(im.size[1]):
                 rgb = im.getpixel((x, y))
