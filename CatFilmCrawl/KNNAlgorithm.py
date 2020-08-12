@@ -24,13 +24,13 @@ def get_true_value(gusess_info):
     p_info = get_font_data() + gusess_info
     # 处理缺失值
     imputer = SimpleImputer(missing_values=np.nan, strategy='mean')
-    data = pd.DataFrame(imputer.fit_transform(pd.DataFrame(p_info)))
+    data = pd.DataFrame(imputer.fit_transform(pd.DataFrame(p_info)))  
     # 取出特征值\目标值
-    x = data.drop([0], axis=1)
-    y = data[0]
+    x = data.drop([0], axis=1)   # 删除第一列，只留剩余的特征值
+    y = data[0]  #   # 获取第一列，即真实值
     # 分割数据集
-    x_train = x.head(100)   # 训练集的特征值
-    y_train = y.head(100)
+    x_train = x.head(100)   # 训练集的前100行对应的特征值
+    y_train = y.head(100)   # 训练集的前100行特征值对应的每行真实值
     x_test = x.tail(10)    # 测试集的特征值
     # 进行算法流程
     knn = KNeighborsClassifier(n_neighbors=1)
