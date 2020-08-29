@@ -1,6 +1,5 @@
 # 一、Python二值化降噪图片
-### 1、使用介绍
-- 直接运行该文件即可CaseRunGather.py
+- 案例文件：直接运行该文件即可CaseRunGather.py
 - Pretreatment_MainColorRgb.py ：适用于字符颜色与噪点颜色有明显区别的情况
 - Pretreatment_TurnGrayField.py ：9领域法去除周围噪点
 # 二、Python使用KNN训练模型并识别验证码
