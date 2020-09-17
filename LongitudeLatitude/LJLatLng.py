@@ -31,7 +31,7 @@ class LianJiaLatLng:
     @staticmethod
     def get_js_params(longitude, latitude, num):
         c = {"lng": longitude, "lat": latitude, "Se": "inner"}
-        path = "./LianJiaLatLng.js"
+        path = "./LJLatLng.js"
         with open(path, 'r', encoding='utf8') as f:
             js_text = f.read()
             obj = execjs.compile(js_text).call('req', c, num)
