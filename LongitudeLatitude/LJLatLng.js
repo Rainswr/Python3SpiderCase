@@ -118,6 +118,7 @@ req = function(lat_lng, num){
     c = Wa(lat_lng);
     return get_max_min(c, num)
 }
+// module.exports = req
 //var lat_lng = {
 //    "lng": 120.5811424828,
 //    "lat":31.3010678543,
