@@ -90,17 +90,17 @@ var Wa = function(a) {
 
 var get_max_min = function(c, b) {
     var e = {
-        "width": 1150,
-        "height": 937
+        "width": 1920,
+        "height": 1080
     };
     var f = "";
     var a = {
         "x": 0,
-        "y": 937
+        "y": 1080
     };
     var lat_lng1 = Zb(a, b, c, e, f);
     a = {
-        "x": 1150,
+        "x": 1920,
         "y": 0
     };
     var lat_lng2 = Zb(a, b, c, e, f);
