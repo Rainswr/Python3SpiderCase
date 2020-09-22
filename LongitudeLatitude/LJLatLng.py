@@ -2,6 +2,7 @@ import requests
 import execjs
 from urllib.parse import urlencode
 import copy
+import re
 
 
 class LianJiaLatLng:
@@ -80,7 +81,8 @@ class LianJiaLatLng:
                     f"{name}_code": row['id'],
                     f"{name}_longitude": row['longitude'],
                     f"{name}_latitude": row['latitude'],
-                    f"{name}_border": row['border']
+                    f"{name}_border": row['border'],
+                    "fullSpell": row['fullSpell']
                 })
                 yield record
 
@@ -93,6 +95,8 @@ class LianJiaLatLng:
         self.param.update(obj)
         self.param.update({"groupType": "district", "cityId": city_code})
         for yield_record in self.get_longitude_latitude(city_lat_lng, self.param):
+            if 'fullSpell' in yield_record:
+                del yield_record['fullSpell']
             print(">>>> district_longitude_latitude:", yield_record)
             # 获取街道经纬度
             param = copy.deepcopy(self.param)
@@ -101,6 +105,11 @@ class LianJiaLatLng:
             param.update(obj)
             param.update({"groupType": "bizcircle"})
             for yield_ds in self.get_longitude_latitude(yield_record, param, "street"):
+                if 'fullSpell' in yield_ds:
+                    district_code = re.search(r"d(\d+)b", yield_ds['fullSpell']).group(1)
+                    if district_code != str(yield_ds['district_code']):
+                        continue
+                    del yield_ds['fullSpell']
                 print("street_longitude_latitude:", yield_ds)
 
 
