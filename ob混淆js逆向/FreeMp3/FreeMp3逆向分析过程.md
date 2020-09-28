@@ -11,7 +11,6 @@
 
 - 1、通过[混淆工具Obfuscator](https://obfuscator.io/)混淆过的代码即obsfuscator混淆（简称ob混淆），点击`Obsfucate`即可混淆如下代码
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20200927082128390.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzQxMTU4NQ==,size_16,color_FFFFFF,t_70#pic_center)
-
 - 2、特点：代码变量形式大篇幅的已`_0x`为前缀进行命名，通过`死代码`和`花指令`增加代码可读难度；通常死代码在程序中完全不会调用，而花指令可能将一个变量经过一系列操作又变回原形的值，其过程毫无意义
 ```javascript
 var _0x2f9b = ['Hello\x20World!']; (function(_0x3af67b, _0x2f9b76) {
