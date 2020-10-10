@@ -7,5 +7,6 @@
 - 案例解析3[Python还原_CryptoJs_DES_CBC模式_js逆向学习](https://blog.csdn.net/weixin_43411585/article/details/108526461)
 ### 二、依赖包
 - python调用js三种方式：要么还原js；要么通过execjs脚本执行；要么通过node布服务执行；
-- python安装aes的库：`pip3 uninstall pycrypto`，`pip3 uninstall crypto`，`pip install pycryptodome`，`pip install pycryptodomex`
+- python安装aes、des、des3的库：`pip3 uninstall pycrypto`，`pip3 uninstall crypto`，`pip install pycryptodome`
 - python安装des的库：`pip install pyDes`
+- python安装rsa的库：`pip install rsa`
