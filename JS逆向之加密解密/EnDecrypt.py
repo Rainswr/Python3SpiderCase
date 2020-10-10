@@ -7,9 +7,31 @@ from Crypto.Util.Padding import pad
 from Crypto.Cipher import AES
 from Crypto.Cipher import DES3
 from Crypto.Cipher import DES
+from pyDes import des, CBC, ECB, PAD_PKCS5
+import rsa
 
 
-class Base64Md5Sha1HmacCrypto:
+class EnDecryptPublicFunction:
+
+    @staticmethod
+    def clean_char(str_text):
+        b_char_list = [
+            b'\x00', b'\x01', b'\x02', b'\x03', b'\x04', b'\x05',
+            b'\x06', b'\x07', b'\x08', b'\x09', b'\n']
+        for b_char in b_char_list:
+            str_text = str_text.replace(b_char.decode(), "")
+        return str_text
+
+    @staticmethod
+    def fill_text(str_text):
+        """字符串补成8的倍数"""
+        num_0 = len(str_text) % 8
+        if num_0 != 0:
+            str_text = str_text + '\0' * (8 - num_0)
+        return str_text
+
+
+class Base64Md5Sha1HmacUtil:
 
     @staticmethod
     def base64_encrypt_text(decrypt_text: str) -> str:
@@ -59,7 +81,7 @@ class Base64Md5Sha1HmacCrypto:
         return mac.hexdigest()
 
 
-class AesCrypto:
+class AesUtil:
 
     @staticmethod
     def aes_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
@@ -94,11 +116,10 @@ class AesCrypto:
         else:
             aes = AES.new(key.encode('utf-8'), AES.MODE_ECB)
         decrypt_text = aes.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
-        decrypt_text = decrypt_text.replace(b'\x00'.decode(), "").rstrip("\n")
-        return decrypt_text
+        return EnDecryptPublicFunction.clean_char(decrypt_text)
 
 
-class DesCrypto:
+class DesUtil:
 
     @staticmethod
     def des_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
@@ -111,10 +132,10 @@ class DesCrypto:
         :return: 加密后的数据
         """
         if model == 'CBC':
-            des = DES.new(key[:8].encode('utf-8'), DES.MODE_CBC, iv.encode('utf-8'))
+            des_obj = des(key[:8].encode('utf-8'), CBC, iv.encode('utf-8'), padmode=PAD_PKCS5)
         else:
-            des = DES.new(key[:8].encode('utf-8'), DES.MODE_ECB)
-        encrypt_text = des.encrypt(pad(decrypt_text.encode('utf-8'), DES3.block_size, style='pkcs7'))
+            des_obj = des(key[:8].encode('utf-8'), ECB, padmode=PAD_PKCS5)
+        encrypt_text = des_obj.encrypt(decrypt_text.encode('utf-8'))
         encrypt_text = base64.b64encode(encrypt_text).decode()
         return encrypt_text
 
@@ -129,15 +150,14 @@ class DesCrypto:
         :return:解密后的数据
         """
         if model == 'CBC':
-            des = DES.new(key[:8].encode('utf-8'), DES.MODE_CBC, iv.encode('utf-8'))
+            des_obj = des(key[:8].encode('utf-8'), CBC, iv.encode('utf-8'), padmode=PAD_PKCS5)
         else:
-            des = DES.new(key[:8].encode('utf-8'), DES.MODE_ECB)
-        decrypt_text = des.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
-        decrypt_text = decrypt_text.replace(b'\x00'.decode(), "").rstrip("\n")
-        return decrypt_text
+            des_obj = des(key[:8].encode('utf-8'), ECB, padmode=PAD_PKCS5)
+        decrypt_text = des_obj.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        return EnDecryptPublicFunction.clean_char(decrypt_text)
 
 
-class Des3Crypto:
+class Des3Util:
 
     @staticmethod
     def des3_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
@@ -172,12 +192,99 @@ class Des3Crypto:
         else:
             des3 = DES3.new(key.encode('utf-8'), DES3.MODE_ECB)
         decrypt_text = des3.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
-        decrypt_text = decrypt_text.replace(b'\x00'.decode(), "").rstrip("\n")
+        return EnDecryptPublicFunction.clean_char(decrypt_text)
+
+
+class PyDesUtil:
+
+    @staticmethod
+    def des_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
+        """
+        DES加密
+        :param decrypt_text: 明文
+        :param key: 密钥
+        :param model: 加密模式： CBC, ECB
+        :param iv: 密钥偏移量
+        :return: 加密后的数据
+        """
+        if model == 'CBC':
+            des_obj = DES.new(key[:8].encode('utf-8'), DES.MODE_CBC, iv.encode('utf-8'))
+        else:
+            des_obj = DES.new(key[:8].encode('utf-8'), DES.MODE_ECB)
+        encrypt_text = des_obj.encrypt(pad(decrypt_text.encode('utf-8'), DES3.block_size, style='pkcs7'))
+        encrypt_text = base64.b64encode(encrypt_text).decode()
+        return encrypt_text
+
+    @staticmethod
+    def des_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC") -> str:
+        """
+        DES解密
+        :param encrypt_text: 密文
+        :param key: 秘钥
+        :param model: 解密模式： CBC, ECB
+        :param iv:秘钥偏移量
+        :return:解密后的数据
+        """
+        if model == 'CBC':
+            des_obj = DES.new(key[:8].encode('utf-8'), DES.MODE_CBC, iv.encode('utf-8'))
+        else:
+            des_obj = DES.new(key[:8].encode('utf-8'), DES.MODE_ECB)
+        decrypt_text = des_obj.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        return EnDecryptPublicFunction.clean_char(decrypt_text)
+
+
+class RsaUtil:
+
+    @staticmethod
+    def rsa_encrypt_text(public_key, decrypt_text: str) -> str:
+        """
+        RSA加密
+        :param public_key:  公钥
+        :param decrypt_text: 明文
+        :return: 加密后的数据
+        """
+        encrypt_text = rsa.encrypt(decrypt_text.encode('utf-8'), rsa.PublicKey.load_pkcs1(public_key))
+        encrypt_text = base64.b64encode(encrypt_text).decode()
+        return encrypt_text
+
+    @staticmethod
+    def rsa_decrypt_text(private_key, encrypt_text: str) -> str:
+        """
+        RSA解密
+        :param private_key: 私钥
+        :param encrypt_text: 密文
+        :return: 明文
+        """
+        decrypt_text = rsa.decrypt(base64.b64decode(encrypt_text), rsa.PrivateKey.load_pkcs1(private_key)).decode('utf8')
         return decrypt_text
+
+    @staticmethod
+    def rsa_sign(private_key, decrypt_text, method="MD5"):
+        """
+        rsa签名
+        :param private_key: 私钥
+        :param decrypt_text: 明文
+        :param method: 'MD5', 'SHA-1','SHA-224', SHA-256', 'SHA-384' or 'SHA-512'
+        :return:
+        """
+        sign_text = rsa.sign(decrypt_text.encode('utf-8'), rsa.PrivateKey.load_pkcs1(private_key), method)
+        sign_text = base64.b64encode(sign_text).decode()
+        return sign_text
+
+    @staticmethod
+    def rsa_verify(signature, public_key, decrypt_text):
+        """
+        rsa验签
+        :param signature: rsa签名
+        :param public_key: 公钥
+        :param decrypt_text: 明文
+        :return:
+        """
+        return rsa.verify(decrypt_text.encode('utf-8'), base64.b64decode(signature), rsa.PublicKey.load_pkcs1(public_key))
 
 
 if __name__ == "__main__":
-    _object = AesCrypto()
+    _object = AesUtil()
     # AES_CBC解密模式
     import re
     encrypt_str = "XP8AMyYnBvtWtrx5guiKmbLHNPXXTco8uMIhDkLH03OjD7CSvc1yqdUs6JSGD97UcjVhiu4d75vv3teFiFtDFbicAW1Wp+W6b7tjTYfPJpetM8KG9heuvDn2NhglJMv9chdBpxaD9l30Na27U2D1sw=="
@@ -209,7 +316,8 @@ if __name__ == "__main__":
     print(f"AES_ECB解密: {decrypt_str}")
 
     print("+++++++++++++++++++++++++=======================================================")
-    _object = DesCrypto()
+    _object = DesUtil()  # 使用Crypto里面的DES库
+    _object2 = PyDesUtil()  # 使用PyDes库
     # DES_CBC加密解密模式
     import json
     param = {"appId": "cf997823ce9425ec88a91bba9c188ca5", "method": "GETDATA", "timestamp": 1599713841621, "clienttype": "WEB", "object": {"city": "杭州"}, "secret": "1c55273cdbb5c59872f74d9bb90484b7"}
@@ -220,19 +328,27 @@ if __name__ == "__main__":
     print(f"DES_CBC加密: {encrypt_str}")
     decrypt_str = _object.des_decrypt_text(encrypt_str, key_str, iv_str)
     print(f"DES_CBC解密: {decrypt_str}")
+    encrypt_str = _object2.des_encrypt_text(decrypt_str, key_str, iv_str)
+    print(f"DES_CBC加密: {encrypt_str}")
+    decrypt_str = _object2.des_decrypt_text(encrypt_str, key_str, iv_str)
+    print(f"DES_CBC解密: {decrypt_str}")
 
     # DES_ECB加密解密模式
-    decrypt_str = "这是一个DES_ECB加密解密模式测试"
+    decrypt_str = "这是一个DES_ECB加密解密模式测试4"
     key_str = "7hyu1o2k"
     encrypt_str = _object.des_encrypt_text(decrypt_str, key_str, model="ECB")
     print(f"DES_ECB加密: {encrypt_str}")
     decrypt_ = _object.des_decrypt_text(encrypt_str, key_str, model="ECB")
     print(f"DES_ECB解密: {decrypt_}")
+    encrypt_str = _object2.des_encrypt_text(decrypt_str, key_str, model="ECB")
+    print(f"DES_ECB加密: {encrypt_str}")
+    decrypt_ = _object2.des_decrypt_text(encrypt_str, key_str, model="ECB")
+    print(f"DES_ECB解密: {decrypt_}")
 
     print("+++++++++++++++++++++++++=======================================================")
     # DES3_CCB加密解密模式
-    _object = Des3Crypto()
-    decrypt_str = "这是一个DES3_CBC加密解密测试"
+    _object = Des3Util()
+    decrypt_str = "这是一个DES3_CBC加密解密测"
     key_str = "7hyu1o2kuytg65ws"
     iv_str = "hyr0mfzf"
     encrypt_str = _object.des3_encrypt_text(decrypt_str, key_str, iv_str)
@@ -240,7 +356,7 @@ if __name__ == "__main__":
     decrypt_ = _object.des3_decrypt_text(encrypt_str, key_str, iv_str)
     print(f"DES3_CBC解密: {decrypt_}")
     # DES3_ECB加密解密模式
-    _object = Des3Crypto()
+    _object = Des3Util()
     decrypt_str = "这是一个DES3_ECB加密解密模式测试"
     key_str = "7hyu1o2kuytg65ws"
     encrypt_str = _object.des3_encrypt_text(decrypt_str, key_str, model="ECB")
@@ -249,7 +365,26 @@ if __name__ == "__main__":
     print(f"DES3_ECB解密: {decrypt_}")
 
     print("+++++++++++++++++++++++++=======================================================")
-    _object = Base64Md5Sha1HmacCrypto()
+    _object = RsaUtil()
+    # rsa加密解密
+    privateKey = '''-----BEGIN RSA PRIVATE KEY----- 
+    MIICXgIBAAKBgQDZAzJb0n62WqMKQUFBdIBUc8Ld8NKuK1nrd9xXVrqt/UwXQlYn MuGc8M1+c4rhRMZHcG1a4RBwUZBjQSWFSf9RdYAMHdyncmiHeTcAExZJC8jN8DrR arbcJqPPPFPSsCMoRh9mxZESLJPikJjUCEdZvBYKXbMtiW5y3eefR6U2WQIDAQAB AoGBAL1NtZM11sUZ4ZmjfNotV3jUFovmdNHsDR+DylkB1gzKpaKwgljlYLu3r3p8 Lgz+InzVDP+2ztE7xVlfzewstaNtRF/P32DI1J+zkK8tvW9jJ1Qj3kBIBeS6adn2 iWeMzcA4hNSekNPj3OXl8ZlsQHcwM+U0WoJV6t6nHF3dMMyBAkEA7KzVGFW5CgBn OLITLbtMCpWgLeL7Cz5ZVZ/0bWOQ8L4Tl2h64XmPCLFWlmIWN1o8ndncfrb7r2BG Y1QJcaNiyQJBAOq7XEuB9TMwXl6L8YdY18Ejve9TrTy8B9m9b++SeYYpKmrQrGxX KOpSY6CV3W04fTdnv3GSeMD1wwqC3oUC7xECQQDAREd41WrU7S7tp/xckmNb1eGi ZVp779Ky9JakptYAPOm9fmsU8KN59FbbJCPYI75Kncm6Rvx/pD6KQqLJZmnBAkEA uLeqYM0rHRZCHRr5fa4fUyECVbS+jh3V+7ZEwP2+XiJE+/usxDEuxH8DYZqtvkaG 2zPshr5iAk8kJkBoRbnSUQJAbS97Id1Beq/rejivApjKTP2lCfkOj4TbluNspiec rs7Eac1FTIFOwD+6tMG3K7nuRQ1UB9Cltjy15XW8MmYHRA== 
+    -----END RSA PRIVATE KEY----- '''
+    publicKey = '''-----BEGIN RSA PUBLIC KEY----- 
+    MIGJAoGBANkDMlvSfrZaowpBQUF0gFRzwt3w0q4rWet33FdWuq39TBdCVicy4Zzw zX5ziuFExkdwbVrhEHBRkGNBJYVJ/1F1gAwd3KdyaId5NwATFkkLyM3wOtFqttwm o888U9KwIyhGH2bFkRIsk+KQmNQIR1m8Fgpdsy2JbnLd559HpTZZAgMBAAE= 
+    -----END RSA PUBLIC KEY----- '''
+    decrypt_str = "nihao@456"
+    encrypt_str = _object.rsa_encrypt_text(publicKey, decrypt_str)
+    print(f"RSA加密: {encrypt_str}")
+    decrypt_str = _object.rsa_decrypt_text(privateKey, encrypt_str)
+    print(f"RSA解密: {decrypt_str}")
+    sign = _object.rsa_sign(privateKey, decrypt_str)
+    print(f"RSA签名: {sign}")
+    verify_sign = _object.rsa_verify(sign, publicKey, decrypt_str)
+    print(f"RSA验签: {verify_sign}")
+
+    print("+++++++++++++++++++++++++=======================================================")
+    _object = Base64Md5Sha1HmacUtil()
     # base64解密
     encrypt_str = "eyJzdWNjZXNzIjp0cnVlLCJlcnJjb2RlIjowLCJlcnJtc2ciOiJzdWNjZXNzIiwicmVzdWx0Ijp7InN1Y2Nlc3MiOnRydWUsImRhdGEiOnsiY2l0eWluZm8iOnsiY2l0eWdpZCI6IjkxIiwiY2l0eWlkIjoiMTAxMjEwMTAxIiwiY2l0eW5hbWUiOiJcdTY3NmRcdTVkZGUiLCJwcm92aW5jZW5hbWUiOiJcdTZkNTlcdTZjNWYiLCJyYW5rZmxhZyI6IjEiLCJyYW5rZmxhZ18xNjkiOiIxIn0sImFxaSI6eyJjaXR5IjoiXHU2NzZkXHU1ZGRlIiwidGltZSI6IjIwMjAtMDktMTAgMDc6MDA6MDAiLCJhcWkiOiI5NyIsInBtMl81IjoiNzIiLCJwbTEwIjoiMTI1Iiwic28yIjoiNy4wMDAiLCJubzIiOiI3NS4wMDAiLCJvMyI6IjIyLjAwMCIsIm8zXzhoIjoiMC4wMDAiLCJjbyI6IjEuMDAwIiwicmFuayI6IjMyNiIsImxldmVsIjoiXHU0ZThjXHU3ZWE3IiwicXVhbGl0eSI6Ilx1ODI2ZiIsInByaW1hcnlfcG9sbHV0YW50IjoiUE0yLjUiLCJkYXlfYXFpIjoiOTMiLCJkYXlfcG9sbCI6IlBNMi41IiwiZGF5X2NvbXBsZXgiOiI1LjgxMCIsIjc0Y29tcGxleHJhbmsiOiI3NCIsImNvbXBsZXhyYW5rIjoiMzI4IiwiMTY5Y29tcGxleHJhbmsiOiIxNjYifSwicm93cyI6W3sidGltZSI6IjIwMjAtMDktMTAgMDc6MDA6MDAiLCJjaXR5bmFtZSI6Ilx1Njc2ZFx1NWRkZSIsInBvaW50Z2lkIjoiMjI3IiwicG9pbnRuYW1lIjoiXHU2ZDU5XHU2YzVmXHU1MTljXHU1OTI3IiwicG9pbnRsZXZlbCI6Ilx1NTZmZFx1NjNhN1x1NzBiOSIsInJlZ2lvbiI6Ilx1NmM1Zlx1NWU3Mlx1NTMzYSIsImxhdGl0dWRlIjoiMzAuMjY5MjAwIiwibG9uZ2l0dWRlIjoiMTIwLjE5MDAwMCIsImFxaSI6IjEzNCIsInpxX2FxaSI6IjAiLCJwbTJfNSI6IjEwMiIsInBtMTAiOiIxNjkiLCJzbzIiOiIxMCIsIm5vMiI6IjEwNiIsImNvIjoiMS4zMDAiLCJvMyI6IjEyIiwiY29tcGxleGluZGV4IjoiOC41NDUyMzgxIiwibGV2ZWwiOiJcdTRlMDlcdTdlYTciLCJxdWFsaXR5IjoiXHU4ZjdiXHU1ZWE2XHU2YzYxXHU2N2QzIiwicHJpbWFyeV9wb2xsdXRhbnQiOiJQTTIuNSIsInJhdGlvIjowLjE3NTQsImluZGV4cmF0aW8iOjAuMDUyNDAwMDAwMDAwMDAwMDAyfSx7InRpbWUiOiIyMDIwLTA5LTEwIDA3OjAwOjAwIiwiY2l0eW5hbWUiOiJcdTY3NmRcdTVkZGUiLCJwb2ludGdpZCI6IjIyNSIsInBvaW50bmFtZSI6Ilx1NGUwYlx1NmM5OSIsInBvaW50bGV2ZWwiOiJcdTU2ZmRcdTYzYTdcdTcwYjkiLCJyZWdpb24iOiJcdTZjNWZcdTVlNzJcdTUzM2EiLCJsYXRpdHVkZSI6IjMwLjMwNTgwMCIsImxvbmdpdHVkZSI6IjEyMC4zNDgwMDAiLCJhcWkiOiIxMTgiLCJ6cV9hcWkiOiIwIiwicG0yXzUiOiI4OSIsInBtMTAiOiIxODUiLCJzbzIiOiIxMiIsIm5vMiI6IjczIiwiY28iOiIxLjEwMCIsIm8zIjoiMjAiLCJjb21wbGV4aW5kZXgiOiI3LjYxMDcxNDMiLCJsZXZlbCI6Ilx1NGUwOVx1N2VhNyIsInF1YWxpdHkiOiJcdThmN2JcdTVlYTZcdTZjNjFcdTY3ZDMiLCJwcmltYXJ5X3BvbGx1dGFudCI6IlBNMTAiLCJyYXRpbyI6MCwiaW5kZXhyYXRpbyI6MC4wMjR9LHsidGltZSI6IjIwMjAtMDktMTAgMDc6MDA6MDAiLCJjaXR5bmFtZSI6Ilx1Njc2ZFx1NWRkZSIsInBvaW50Z2lkIjoiMjI4IiwicG9pbnRuYW1lIjoiXHU2NzFkXHU2NjU2XHU0ZTk0XHU1MzNhIiwicG9pbnRsZXZlbCI6Ilx1NTZmZFx1NjNhN1x1NzBiOSIsInJlZ2lvbiI6Ilx1NGUwYlx1NTdjZVx1NTMzYSIsImxhdGl0dWRlIjoiMzAuMjg5NzAwIiwibG9uZ2l0dWRlIjoiMTIwLjE1NzAwMCIsImFxaSI6IjEwOCIsInpxX2FxaSI6IjAiLCJwbTJfNSI6IjgxIiwicG0xMCI6IjE0NiIsInNvMiI6IjEwIiwibm8yIjoiMTIwIiwiY28iOiIxLjEwMCIsIm8zIjoiMTEiLCJjb21wbGV4aW5kZXgiOiI3LjkxMDQxNjciLCJsZXZlbCI6Ilx1NGUwOVx1N2VhNyIsInF1YWxpdHkiOiJcdThmN2JcdTVlYTZcdTZjNjFcdTY3ZDMiLCJwcmltYXJ5X3BvbGx1dGFudCI6IlBNMi41IiwicmF0aW8iOjAuMDU4Nzk5OTk5OTk5OTk5OTk4LCJpbmRleHJhdGlvIjowLjAxOTU5OTk5OTk5OTk5OTk5OX0seyJ0aW1lIjoiMjAyMC0wOS0xMCAwNzowMDowMCIsImNpdHluYW1lIjoiXHU2NzZkXHU1ZGRlIiwicG9pbnRnaWQiOiIyMzEiLCJwb2ludG5hbWUiOiJcdTU3Y2VcdTUzYTJcdTk1NDciLCJwb2ludGxldmVsIjoiXHU1NmZkXHU2M2E3XHU3MGI5IiwicmVnaW9uIjoiXHU4NDI3XHU1YzcxXHU1MzNhIiwibGF0aXR1ZGUiOiIzMC4xODE5MDAiLCJsb25naXR1ZGUiOiIxMjAuMjcwMDAwIiwiYXFpIjoiMTAwIiwienFfYXFpIjoiMCIsInBtMl81IjoiNzUiLCJwbTEwIjoiMTE2Iiwic28yIjoiNiIsIm5vMiI6Ijc5IiwiY28iOiIwLjkwMCIsIm8zIjoiMzYiLCJjb21wbGV4aW5kZXgiOiI2LjMyNTAwMDAiLCJsZXZlbCI6Ilx1NGU4Y1x1N2VhNyIsInF1YWxpdHkiOiJcdTgyNmYiLCJwcmltYXJ5X3BvbGx1dGFudCI6IlBNMi41IiwicmF0aW8iOi0wLjAyOTEwMDAwMDAwMDAwMDAwMSwiaW5kZXhyYXRpbyI6LTAuMDAyNzAwMDAwMDAwMDAwMDAwMX0seyJ0aW1lIjoiMjAyMC0wOS0xMCAwNzowMDowMCIsImNpdHluYW1lIjoiXHU2NzZkXHU1ZGRlIiwicG9pbnRnaWQiOiIyMjIiLCJwb2ludG5hbWUiOiJcdTZlZThcdTZjNWYiLCJwb2ludGxldmVsIjoiXHU1NmZkXHU2M2E3XHU3MGI5IiwicmVnaW9uIjoiXHU2ZWU4XHU2YzVmXHU1MzNhIiwibGF0aXR1ZGUiOiIzMC4yMTAwMDAiLCJsb25naXR1ZGUiOiIxMjAuMjExMDAwIiwiYXFpIjoiOTgiLCJ6cV9hcWkiOiIwIiwicG0yXzUiOiI3MyIsInBtMTAiOiIxMjEiLCJzbzIiOiI5Iiwibm8yIjoiOTYiLCJjbyI6IjEuMDAwIiwibzMiOiIxNCIsImNvbXBsZXhpbmRleCI6IjYuNzAxNzg1NyIsImxldmVsIjoiXHU0ZThjXHU3ZWE3IiwicXVhbGl0eSI6Ilx1ODI2ZiIsInByaW1hcnlfcG9sbHV0YW50IjoiUE0yLjUiLCJyYXRpbyI6MC4wMzE2MDAwMDAwMDAwMDAwMDMsImluZGV4cmF0aW8iOjAuMDIyM30seyJ0aW1lIjoiMjAyMC0wOS0xMCAwNzowMDowMCIsImNpdHluYW1lIjoiXHU2NzZkXHU1ZGRlIiwicG9pbnRnaWQiOiIyMjkiLCJwb2ludG5hbWUiOiJcdTU0OGNcdTc3NjZcdTVjMGZcdTViNjYiLCJwb2ludGxldmVsIjoiXHU1NmZkXHU2M2E3XHU3MGI5IiwicmVnaW9uIjoiXHU2MmYxXHU1ODg1XHU1MzNhIiwibGF0aXR1ZGUiOiIzMC4zMTE5MDAiLCJsb25naXR1ZGUiOiIxMjAuMTIwMDAwIiwiYXFpIjoiODkiLCJ6cV9hcWkiOiIwIiwicG0yXzUiOiI2NiIsInBtMTAiOiIxMjgiLCJzbzIiOiI2Iiwibm8yIjoiNTgiLCJjbyI6IjEuMTAwIiwibzMiOiI1NCIsImNvbXBsZXhpbmRleCI6IjUuODc2Nzg1NyIsImxldmVsIjoiXHU0ZThjXHU3ZWE3IiwicXVhbGl0eSI6Ilx1ODI2ZiIsInByaW1hcnlfcG9sbHV0YW50IjoiUE0xMCIsInJhdGlvIjowLjA0NzEwMDAwMDAwMDAwMDAwMywiaW5kZXhyYXRpbyI6MC4wNzA0MDAwMDAwMDAwMDAwMDR9LHsidGltZSI6IjIwMjAtMDktMTAgMDc6MDA6MDAiLCJjaXR5bmFtZSI6Ilx1Njc2ZFx1NWRkZSIsInBvaW50Z2lkIjoiMjI2IiwicG9pbnRuYW1lIjoiXHU1MzY3XHU5Zjk5XHU2ODY1IiwicG9pbnRsZXZlbCI6Ilx1NTZmZFx1NjNhN1x1NzBiOSIsInJlZ2lvbiI6Ilx1ODk3Zlx1NmU1Nlx1NTMzYSIsImxhdGl0dWRlIjoiMzAuMjQ1NjAwIiwibG9uZ2l0dWRlIjoiMTIwLjEyNzAwMCIsImFxaSI6Ijg3IiwienFfYXFpIjoiMCIsInBtMl81IjoiNjQiLCJwbTEwIjoiOTEiLCJzbzIiOiI1Iiwibm8yIjoiMzUiLCJjbyI6IjEuMDAwIiwibzMiOiIyOCIsImNvbXBsZXhpbmRleCI6IjQuNTExOTA0OCIsImxldmVsIjoiXHU0ZThjXHU3ZWE3IiwicXVhbGl0eSI6Ilx1ODI2ZiIsInByaW1hcnlfcG9sbHV0YW50IjoiUE0yLjUiLCJyYXRpbyI6MC4wODc0OTk5OTk5OTk5OTk5OTQsImluZGV4cmF0aW8iOjAuMDQ4MDk5OTk5OTk5OTk5OTk3fSx7InRpbWUiOiIyMDIwLTA5LTEwIDA3OjAwOjAwIiwiY2l0eW5hbWUiOiJcdTY3NmRcdTVkZGUiLCJwb2ludGdpZCI6IjIzMCIsInBvaW50bmFtZSI6Ilx1NGUzNFx1NWU3M1x1OTU0NyIsInBvaW50bGV2ZWwiOiJcdTU2ZmRcdTYzYTdcdTcwYjkiLCJyZWdpb24iOiJcdTRmNTlcdTY3NmRcdTUzM2EiLCJsYXRpdHVkZSI6IjMwLjQxODMwMCIsImxvbmdpdHVkZSI6IjEyMC4zMDEwMDAiLCJhcWkiOiI4NCIsInpxX2FxaSI6IjAiLCJwbTJfNSI6IjUxIiwicG0xMCI6IjExNyIsInNvMiI6IjUiLCJubzIiOiI3NCIsImNvIjoiMC44MDAiLCJvMyI6IjE5IiwiY29tcGxleGluZGV4IjoiNS4zODA2NTQ4IiwibGV2ZWwiOiJcdTRlOGNcdTdlYTciLCJxdWFsaXR5IjoiXHU4MjZmIiwicHJpbWFyeV9wb2xsdXRhbnQiOiJQTTEwIiwicmF0aW8iOjAuMTgzMTAwMDAwMDAwMDAwMDEsImluZGV4cmF0aW8iOjAuMTM0MDAwMDAwMDAwMDAwMDF9LHsidGltZSI6IjIwMjAtMDktMTAgMDc6MDA6MDAiLCJjaXR5bmFtZSI6Ilx1Njc2ZFx1NWRkZSIsInBvaW50Z2lkIjoiMjU0OSIsInBvaW50bmFtZSI6Ilx1Njg1MFx1NWU5MFx1NmM1Zlx1NTMxNyIsInBvaW50bGV2ZWwiOiJcdTc3MDFcdTYzYTdcdTcwYjkiLCJyZWdpb24iOiJcdTY4NTBcdTVlOTBcdTUzYmYiLCJsYXRpdHVkZSI6IjI5LjgwMzk2NiIsImxvbmdpdHVkZSI6IjExOS42NzExMTEiLCJhcWkiOiI4MiIsInpxX2FxaSI6IjAiLCJwbTJfNSI6IjYwIiwicG0xMCI6IjkxIiwic28yIjoiMjAiLCJubzIiOiIzNyIsImNvIjoiMC45MDAiLCJvMyI6IjUwIiwiY29tcGxleGluZGV4IjoiNC44MTAxMTkwIiwibGV2ZWwiOiJcdTRlOGNcdTdlYTciLCJxdWFsaXR5IjoiXHU4MjZmIiwicHJpbWFyeV9wb2xsdXRhbnQiOiJQTTIuNSIsInJhdGlvIjotMC4wMzUyOTk5OTk5OTk5OTk5OTgsImluZGV4cmF0aW8iOjAuMDQxMjAwMDAwMDAwMDAwMDAxfSx7InRpbWUiOiIyMDIwLTA5LTEwIDA3OjAwOjAwIiwiY2l0eW5hbWUiOiJcdTY3NmRcdTVkZGUiLCJwb2ludGdpZCI6IjIyMyIsInBvaW50bmFtZSI6Ilx1ODk3Zlx1NmVhYSIsInBvaW50bGV2ZWwiOiJcdTU2ZmRcdTYzYTdcdTcwYjkiLCJyZWdpb24iOiJcdTg5N2ZcdTZlNTZcdTUzM2EiLCJsYXRpdHVkZSI6IjMwLjI3NDcwMCIsImxvbmdpdHVkZSI6IjEyMC4wNjMwMDAiLCJhcWkiOiI4MCIsInpxX2FxaSI6IjAiLCJwbTJfNSI6IjU5IiwicG0xMCI6IjEwMCIsInNvMiI6IjUiLCJubzIiOiI2NCIsImNvIjoiMC44MDAiLCJvMyI6IjExIiwiY29tcGxleGluZGV4IjoiNS4wNjYzNjkwIiwibGV2ZWwiOiJcdTRlOGNcdTdlYTciLCJxdWFsaXR5IjoiXHU4MjZmIiwicHJpbWFyeV9wb2xsdXRhbnQiOiJQTTIuNSIsInJhdGlvIjowLjAyNTYwMDAwMDAwMDAwMDAwMSwiaW5kZXhyYXRpbyI6LTAuMDU3MjAwMDAwMDAwMDAwMDAxfSx7InRpbWUiOiIyMDIwLTA5LTEwIDA3OjAwOjAwIiwiY2l0eW5hbWUiOiJcdTY3NmRcdTVkZGUiLCJwb2ludGdpZCI6IjI1MzgiLCJwb2ludG5hbWUiOiJcdTY4NTBcdTVlOTBcdTZjNWZcdTUzNTciLCJwb2ludGxldmVsIjoiXHU3NzAxXHU2M2E3XHU3MGI5IiwicmVnaW9uIjoiXHU2ODUwXHU1ZTkwXHU1M2JmIiwibGF0aXR1ZGUiOiIyOS43OTYxMzYiLCJsb25naXR1ZGUiOiIxMTkuNjkwNTY4IiwiYXFpIjoiNzciLCJ6cV9hcWkiOiIwIiwicG0yXzUiOiI1NiIsInBtMTAiOiI5NiIsInNvMiI6IjExIiwibm8yIjoiMzMiLCJjbyI6IjAuNzAwIiwibzMiOiI1NiIsImNvbXBsZXhpbmRleCI6IjQuNTA0NzYxOSIsImxldmVsIjoiXHU0ZThjXHU3ZWE3IiwicXVhbGl0eSI6Ilx1ODI2ZiIsInByaW1hcnlfcG9sbHV0YW50IjoiUE0yLjUiLCJyYXRpbyI6MC4xMTU5LCJpbmRleHJhdGlvIjowLjAzOTgwMDAwMDAwMDAwMDAwMn0seyJ0aW1lIjoiMjAyMC0wOS0xMCAwNzowMDowMCIsImNpdHluYW1lIjoiXHU2NzZkXHU1ZGRlIiwicG9pbnRnaWQiOiIyMzIiLCJwb2ludG5hbWUiOiJcdTRlOTFcdTY4MTYiLCJwb2ludGxldmVsIjoiXHU1NmZkXHU2M2E3XHU3MGI5IiwicmVnaW9uIjoiXHU4OTdmXHU2ZTU2XHU1MzNhIiwibGF0aXR1ZGUiOiIzMC4xODA4MDAiLCJsb25naXR1ZGUiOiIxMjAuMDg4MDAwIiwiYXFpIjoiNzUiLCJ6cV9hcWkiOiIwIiwicG0yXzUiOiI1NSIsInBtMTAiOiI3OCIsInNvMiI6IjQiLCJubzIiOiI0NiIsImNvIjoiMC44MDAiLCJvMyI6IjIwIiwiY29tcGxleGluZGV4IjoiNC4yMjczODEwIiwibGV2ZWwiOiJcdTRlOGNcdTdlYTciLCJxdWFsaXR5IjoiXHU4MjZmIiwicHJpbWFyeV9wb2xsdXRhbnQiOiJQTTIuNSIsInJhdGlvIjowLjAxMzUsImluZGV4cmF0aW8iOjAuMDE4OX0seyJ0aW1lIjoiMjAyMC0wOS0xMCAwNzowMDowMCIsImNpdHluYW1lIjoiXHU2NzZkXHU1ZGRlIiwicG9pbnRnaWQiOiIyNDI3IiwicG9pbnRuYW1lIjoiXHU3NmQxXHU2ZDRiXHU2OTdjIiwicG9pbnRsZXZlbCI6Ilx1NzcwMVx1NjNhN1x1NzBiOSIsInJlZ2lvbiI6Ilx1NWVmYVx1NWZiN1x1NWUwMiIsImxhdGl0dWRlIjoiMjkuNDc0NDQyIiwibG9uZ2l0dWRlIjoiMTE5LjI3NjI0NyIsImFxaSI6IjUzIiwienFfYXFpIjoiMCIsInBtMl81IjoiMzUiLCJwbTEwIjoiNTUiLCJzbzIiOiI2Iiwibm8yIjoiNDIiLCJjbyI6IjAuNzAwIiwibzMiOiIxNSIsImNvbXBsZXhpbmRleCI6IjMuMjA0NDY0MyIsImxldmVsIjoiXHU0ZThjXHU3ZWE3IiwicXVhbGl0eSI6Ilx1ODI2ZiIsInByaW1hcnlfcG9sbHV0YW50IjoiUE0xMCIsInJhdGlvIjowLjAxOTE5OTk5OTk5OTk5OTk5OCwiaW5kZXhyYXRpbyI6MC4wODY1OTk5OTk5OTk5OTk5OTZ9LHsidGltZSI6IjIwMjAtMDktMTAgMDc6MDA6MDAiLCJjaXR5bmFtZSI6Ilx1Njc2ZFx1NWRkZSIsInBvaW50Z2lkIjoiMjI0IiwicG9pbnRuYW1lIjoiXHU1MzQzXHU1YzliXHU2ZTU2IiwicG9pbnRsZXZlbCI6Ilx1NTZmZFx1NjNhN1x1NzBiOSIsInJlZ2lvbiI6Ilx1NmRmM1x1NWI4OVx1NTNiZiIsImxhdGl0dWRlIjoiMjkuNjM1MDAwIiwibG9uZ2l0dWRlIjoiMTE5LjAyNjAwMCIsImFxaSI6IjUyIiwienFfYXFpIjoiMCIsInBtMl81IjoiMzEiLCJwbTEwIjoiNTMiLCJzbzIiOiI0Iiwibm8yIjoiMTQiLCJjbyI6IjAuNTAwIiwibzMiOiI4OCIsImNvbXBsZXhpbmRleCI6IjIuNzM0NTIzOCIsImxldmVsIjoiXHU0ZThjXHU3ZWE3IiwicXVhbGl0eSI6Ilx1ODI2ZiIsInByaW1hcnlfcG9sbHV0YW50IjoiUE0xMCIsInJhdGlvIjowLjAxOTU5OTk5OTk5OTk5OTk5OSwiaW5kZXhyYXRpbyI6MC4wNjc1OTk5OTk5OTk5OTk5OTN9LHsidGltZSI6IjIwMjAtMDktMTAgMDc6MDA6MDAiLCJjaXR5bmFtZSI6Ilx1Njc2ZFx1NWRkZSIsInBvaW50Z2lkIjoiMjQ0NyIsInBvaW50bmFtZSI6Ilx1N2IyY1x1NGU4Y1x1NGUyZFx1NWI2NiIsInBvaW50bGV2ZWwiOiJcdTc3MDFcdTYzYTdcdTcwYjkiLCJyZWdpb24iOiJcdTVlZmFcdTVmYjdcdTVlMDIiLCJsYXRpdHVkZSI6IjI5LjQ2MTI3MiIsImxvbmdpdHVkZSI6IjExOS4yODc2ODMiLCJhcWkiOiI1MiIsInpxX2FxaSI6IjAiLCJwbTJfNSI6IjM2IiwicG0xMCI6IjUzIiwic28yIjoiNCIsIm5vMiI6IjQzIiwiY28iOiIwLjcwMCIsIm8zIjoiMTIiLCJjb21wbGV4aW5kZXgiOiIzLjE3NzM4MTAiLCJsZXZlbCI6Ilx1NGU4Y1x1N2VhNyIsInF1YWxpdHkiOiJcdTgyNmYiLCJwcmltYXJ5X3BvbGx1dGFudCI6IlBNMTAiLCJyYXRpbyI6MC4wNjExOTk5OTk5OTk5OTk5OTcsImluZGV4cmF0aW8iOjAuMDA0NDk5OTk5OTk5OTk5OTk5N30seyJ0aW1lIjoiMjAyMC0wOS0xMCAwNzowMDowMCIsImNpdHluYW1lIjoiXHU2NzZkXHU1ZGRlIiwicG9pbnRnaWQiOiIyNTUzIiwicG9pbnRuYW1lIjoiXHU2ZGYzXHU1Yjg5XHU3M2FmXHU0ZmRkXHU1OTI3XHU2OTdjIiwicG9pbnRsZXZlbCI6Ilx1NzcwMVx1NjNhN1x1NzBiOSIsInJlZ2lvbiI6Ilx1NmRmM1x1NWI4OVx1NTNiZiIsImxhdGl0dWRlIjoiMjkuNTk2OTkwIiwibG9uZ2l0dWRlIjoiMTE5LjA1MzI3NSIsImFxaSI6IjUxIiwienFfYXFpIjoiMCIsInBtMl81IjoiMzAiLCJwbTEwIjoiNTIiLCJzbzIiOiI1Iiwibm8yIjoiMjkiLCJjbyI6IjAuNzAwIiwibzMiOiI1OSIsImNvbXBsZXhpbmRleCI6IjIuOTUyMDgzMyIsImxldmVsIjoiXHU0ZThjXHU3ZWE3IiwicXVhbGl0eSI6Ilx1ODI2ZiIsInByaW1hcnlfcG9sbHV0YW50IjoiUE0xMCIsInJhdGlvIjowLjEwODcsImluZGV4cmF0aW8iOjAuMTUwN31dLCJ0b3RhbCI6MTIsIndlYXRoZXIiOnsidGltZSI6IjIwMjAtMDktMTAgMDg6MDA6MDAiLCJ3ZWF0aGVyIjoiXHU1YzBmXHU5NmU4Iiwid2VhdGhlcl9pY29uIjoiaHR0cHM6XC9cL3d3dy56cTEyMzY5LmNvbVwvcmVzb3VyY2VcL2ltZ1wvd2VhdGhlcm5ld1wvMTEucG5nIiwidGVtcCI6IjI3IiwiaHVtaSI6IjY5IiwicmFpbiI6IjAiLCJ3ZCI6Ilx1NTM1N1x1OThjZSIsIndkYW5nbGUiOiIxODQiLCJ3cyI6IjIiLCJ3bCI6IjIiLCJ2aXNpYmlsaXR5IjoxMCwicHJlc3N1cmUiOiIxMDAyIiwidHEiOiJcdTk2MzRcdThmNmNcdTVjMGZcdTk2ZTgifX19fQ=="
     decrypt_str = _object.base64_decrypt_text(encrypt_str)
@@ -271,45 +406,6 @@ if __name__ == "__main__":
     encrypt_str = _object.hmac_encrypt_text(decrypt_str, "auhuwie2")
     print(f"hamc加密: {encrypt_str}")
 
-# from pyDes import des, CBC, ECB, PAD_PKCS5
-# class DesCrypto:
-#
-#     @staticmethod
-#     def des_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
-#         """
-#         DES加密
-#         :param decrypt_text: 明文
-#         :param key: 密钥
-#         :param model: 加密模式： CBC, ECB
-#         :param iv: 密钥偏移量
-#         :return: 加密后的数据
-#         """
-#         if model == 'CBC':
-#             des_obj = des(key[:8].encode('utf-8'), CBC, iv.encode('utf-8'), padmode=PAD_PKCS5)
-#         else:
-#             des_obj = des(key[:8].encode('utf-8'), ECB, padmode=PAD_PKCS5)
-#         encrypt_text = des_obj.encrypt(decrypt_text.encode('utf-8'))
-#         encrypt_text = base64.b64encode(encrypt_text).decode()
-#         return encrypt_text
-#
-#     @staticmethod
-#     def des_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC") -> str:
-#         """
-#         DES解密
-#         :param encrypt_text: 密文
-#         :param key: 秘钥
-#         :param model: 解密模式： CBC, ECB
-#         :param iv:秘钥偏移量
-#         :return:解密后的数据
-#         """
-#         if model == 'CBC':
-#             des_obj = des(key[:8].encode('utf-8'), CBC, iv.encode('utf-8'), padmode=PAD_PKCS5)
-#         else:
-#             des_obj = des(key[:8].encode('utf-8'), ECB, padmode=PAD_PKCS5)
-#         decrypt_text = des_obj.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
-#         decrypt_text = decrypt_text.replace(b'\x00'.decode(), "").rstrip("\n")
-#         return decrypt_text
-
 
 # pip3 uninstall pycrypto
 # pip3 uninstall crypto
@@ -324,4 +420,3 @@ if __name__ == "__main__":
 # DES、DES3、AES、RSA、MD5、SHA、HMAC传入的消息或者密钥都是bytes数据类型，不是bytes数据类型的需要先转换；密钥一般是8的倍数
 # Python实现RSA中，在rsa库中带有生成签名和校对签名的方法
 # 安全性：DES<DES3=AES<RSA,至于MD5、SHA、HMAC不好说了
-
