@@ -406,17 +406,3 @@ if __name__ == "__main__":
     encrypt_str = _object.hmac_encrypt_text(decrypt_str, "auhuwie2")
     print(f"hamc加密: {encrypt_str}")
 
-
-# pip3 uninstall pycrypto
-# pip3 uninstall crypto
-# pip3 install pycryptodome
-# pip install pyDes
-#
-# 对称加密（加密解密密钥相同）：DES、DES3、AES
-# 非对称加密（分公钥私钥）：RSA
-# 信息摘要算法/签名算法：MD5、HMAC、SHA
-# 前端实际使用中MD5、AES、RSA使用频率是最高的
-# 几种加密方式配合次序：采用非对称加密算法管理对称算法的密钥，然后用对称加密算法加密数据，用签名算法生成非对称加密的摘要
-# DES、DES3、AES、RSA、MD5、SHA、HMAC传入的消息或者密钥都是bytes数据类型，不是bytes数据类型的需要先转换；密钥一般是8的倍数
-# Python实现RSA中，在rsa库中带有生成签名和校对签名的方法
-# 安全性：DES<DES3=AES<RSA,至于MD5、SHA、HMAC不好说了
