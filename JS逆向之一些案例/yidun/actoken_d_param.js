@@ -9,6 +9,7 @@ var ia = {"Yb":{"c":0,"a":"STRING","e":3},"Ia":{"c":1,"a":"STRING","e":20},"Ja":
 var ib = 4, gb = 64, P = 64, Ea=4, bb=3, na=setTimeout;
 var Zc = [36,-24,-56,-65,4,-63,-66,84,57,49,103,-128,19,-94,-54,-4,13,96,-53,59,94,-5,92,37,-83,-45,15,-49,-93,107,70,-55,-82,-28,115,-64,117,-58,-3,124,-20,-87,112,34,-122,-68,-81,-57,119,-46,-97,-104,-14,90,-40,-35,79,21,-101,45,3,-75,121,-29,-80,64,-89,-108,6,-77,60,67,20,-23,-70,8,24,27,-126,-52,17,113,55,-41,-123,-17,32,-78,-100,-72,-109,100,46,-103,18,-32,-74,40,-60,93,-67,-69,58,31,-90,-30,72,-105,-51,71,123,65,98,61,-116,-91,106,91,-120,80,-6,-62,102,0,51,-37,-7,41,12,97,-33,-119,76,89,-1,95,126,2,88,86,87,-112,-18,-39,23,-99,-61,85,44,127,28,99,-47,101,47,116,62,26,120,110,-8,53,-48,-43,-36,68,-31,81,-111,104,-15,1,-106,-124,-12,39,-114,54,-73,-95,-16,-27,35,-88,114,-125,50,-98,111,-34,43,-71,66,-26,29,33,-110,-10,16,-42,-13,-25,-113,-38,-92,10,73,75,-127,9,11,52,78,-59,-44,109,48,69,-2,-19,63,-121,14,82,77,125,38,122,-86,42,-76,-11,-9,-118,-115,7,-107,83,-117,-79,30,-50,-21,118,108,56,-85,-96,105,5,-22,74,-102,22,-84,25]
 var Tb = ["G","w","V","x","2","p","8","7","t","W","S","v","+","0","k","R","9","s","M","4","h","q","J","K",".","Z","X","E","6","D","a","5","o","T","O","I","m","L","f","n","Q","b","y","g","N","l","P","d","r","c","j","A","Y","H","/","i","U","z","B","e","C","1","F","u"]
+var B = {"state":{"options":{"auto":true,"staticServer":"acstatic-dun.126.net","apiServer":"webzjac.reg.163.com","productNumber":"YD00000710348764","protocol":"https","domain":"","Mc":[""],"fc":[""],"buildVersion":"2.6.2_c0bda046","lastUsedVersion":"2.7.1_a02527b8","na":false,"sConfig":"9ca170a1abeedba16ba1f2ac96ed26f3eafd9af866eebda18eae7ef2f1acc3af2aa2bdbbc3b92aa3bde285f866eeeffad4fc7faef2ad90f025b6eee183a128e2bca4c3b92ae2f4ee8ee867e2e6fbd1af2aafbba7c3b939f4f0e4c3e26faffef6d3b328e2bdab8aa132f1f000cda161a7b3eedbb43cf0fea586ec2afaed00d1af2aa6bba3c3b93af4f4ee87e863e2e6fdd1b328e2adab8ea132f2f0e4c3f26fabfef6d4b33cf0feab8be270e2e6aa82ef79a7f4ee86e579e2e6aa82ef79a7f4ee86f679e2e6aa82ef79a7f4ee93e880e2e6ffcda169afb2eedbb128e2bda7c3b93bf4f0e4c3ee80a7b3eedbb83cf0fea195e863e2e6fdd1b328e2b3bc86f02afaeb00cda167b8bba7c3b939f4f0e4c3f366e2e6eebac73cf4f000d1b63bf4edfcd9b63ef8fee4c3e870a1fef695f17fa7f4ee83ef2afafeeecda163b6b0eedbb23cf4f000d1af2aa8acba91a132fceafcd1b33cf4f0e4c3f780adfef6d3b33cf4f4ee86e47fe2e6aa82ef79a7f4ee82e780e2e6fbd1af2aa7acadc3b96ea3b4bd86af2ab8bdbcc3b93cbf","configHash":"9ca170a1abeedba16ba1f2ac96ed26f3eafd9af866eebda18eae7ef2f1acc3af2aa2bdbbc3b92aa3bde285f866eeeffad4fc7faef2ad90f025b6eee183a128e2bca4c3b92ae2f4ee8ee867e2e6fbd1af2aafbba7c3b939f4f0e4c3e26faffef6d3b328e2bdab8aa132f1f000cda161a7b3eedbb43cf0fea586ec2afaed00d1af2aa6bba3c3b93af4f4ee87e863e2e6fdd1b328e2adab8ea132f2f0e4c3f26fabfef6d4b33cf0feab8be270e2e6aa82ef79a7f4ee86e579e2e6aa82ef79a7f4ee86f679e2e6aa82ef79a7f4ee93e880e2e6ffcda169afb2eedbb128e2bda7c3b93bf4f0e4c3ee80a7b3eedbb83cf0fea195e863e2e6fdd1b328e2b3bc86f02afaeb00cda167b8bba7c3b939f4f0e4c3f366e2e6eebac73cf4f000d1b63bf4edfcd9b63ef8fee4c3e870a1fef695f17fa7f4ee83ef2afafeeecda163b6b0eedbb23cf4f000d1af2aa8acba91a132fceafcd1b33cf4f0e4c3f780adfef6d3b33cf4f4ee86e47fe2e6aa82ef79a7f4ee82e780e2e6fbd1af2aa7acadc3b96ea3b4bd86af2ab8bdbcc3b93cbf","merged":true,"nc":false,"oc":false,"ma":true,"sc":300000,"kc":86400000,"jc":"ac.dun.163yun.com/v2/d","ec":"ac.dun.163yun.com/v2/b","Hc":2000,"sa":1,"moveMax":50,"moveInterval":300,"keydownMax":10,"keydownInterval":300,"clickMax":20,"clickInterval":300,"upMax":20,"upInterval":300,"downMax":20,"downInterval":300,"focusMax":20,"focusInterval":300,"blurMax":20,"blurInterval":300,"scrollMax":20,"scrollInterval":300,"__serverConfig__":{"configServer":"webzjac.reg.163.com","apiServer":"webzjac.reg.163.com","staticServer":"acstatic-dun.126.net"},"C":"47QByNK2RmsQREAVVAd+biOyvRpmgq66","V":1612187916799,"Jc":20892,"ja":"7ef4da58447919badeea0a8b20ac7e54","uc":false},"ta":0,"W":[27,5,8,1340,1,0],"oa":""},"Nb":[],"ba":{},"ha":{}}
 
 var Gb = {
     "jb": {
@@ -37,102 +38,90 @@ var Gb = {
     },
 }
 var Ec = {
-    ob: {
-        f: function() {
-            return Ia(a[379])
-        },
-        a: u
+    "ob": {
+        f: function() {return 1},
+       "a": "NUMBER"
     },
-    gb: {
-        f: function() {
-            return Ia(a[732])
-        },
-        a: u
+    "gb": {
+        f: function() {return 1},
+        "a": "NUMBER"
     },
-    rb: {
-        f: function() {
-            return Ia(a[365])
-        },
-        a: u
+    "rb": {
+        f: function() {return 5},
+        "a": "NUMBER"
     },
-    Kb: {
-        f: function() {
-            return Ia(a[241])
-        },
-        a: u
+    "Kb": {
+        f: function() {return 12},
+        "a": "NUMBER"
     },
-    mb: {
-        f: function() {
-            return w.history.length || b[11]
-        },
-        a: u
+    "mb": {
+        f: function() {return 3},
+        "a": "NUMBER"
     },
-    Sb: {
-        f: function() {
-            return v[a[710]] || a[0]
-        },
-        a: t
+    "Sb": {
+        f: function() {return "URS组件"},
+        "a": "STRING"
     },
-    ub: {
-        f: function() {
-            return v.Pc || a[0]
-        },
-        a: t
+    "ub": {
+        f: function() {return ""},
+        "a": "STRING"
     },
-    Pb: {
-        f: function() {
-            return (v[a[1010]][a[615]] || v[a[1010]][a[609]]).length || b[11]
-        },
-        a: u
+    "Pb": {
+        f: function() {return 93188},
+        "a": "NUMBER"
     },
-    nb: {
+    "nb": {
         f: function() {
-            return v[a[1010]][a[522]].length || b[11]
+            // // return v["documentElement"]["innerHTML"].length || b[11]
+            // return v[a[1010]][a[522]].length || b[11]
+            return 103206
         },
-        a: u
+       "a": "NUMBER"
     },
-    qb: {
-        f: function() {
-            return B[a[354]].W[0]
-        },
-        a: u
+    "qb": {
+        f: function() {return 15},
+        "a": "NUMBER"
     },
-    hb: {
+    "hb": {
         f: function() {
-            return B[a[354]].W.slice(b[675])
+            // return B["state"].W.slice(b[675])
+            // return B[a[354]].W.slice(b[675])
+            return [13, 3, 0, 1, 0]
         },
-        a: F
+        "a": "ARRAY"
     },
-    Db: {
+    "Db": {
         f: function() {
-            var d = w[x[16]];
-            if (d) {
-                var c = d[a[545]];
-                return [d[a[746]].type, c[a[581]] - c[a[895]], c[a[1014]] - c[a[98]]]
-            }
-            return [b[11], b[11], b[11]]
+            // var d = w[x[16]];
+            // if (d) {
+            //     var c = d[a[545]];
+            //     // d["timing"]
+            //     //return [d["navigation"].type, c["responseStart"] - c["requestStart"], c["responseEnd"] - c["fetchStart"]]  
+            //     return [d[a[746]].type, c[a[581]] - c[a[895]], c[a[1014]] - c[a[98]]]
+            // }
+            // return [b[11], b[11], b[11]]
+            return [0, 34, 100]
         },
-        a: F
+        "a": "ARRAY"
     },
-    Ma: {
-        f: function() {
-            return [w[a[840]] || v[a[280]][a[820]], w[a[419]] || v[a[280]][a[362]]]
-        },
-        a: F
+    "Ma": {
+        f: function() {return [382,520]},
+        "a": "ARRAY"
     },
-    Mb: {
-        f: function() {
-            return ab() ? b[675] : b[12]
-        },
-        a: u
+    "Mb": {
+        f: function() {return 1},
+        "a": "NUMBER"
     },
-    Zb: {
+    "Zb": {
         f: function() {
-            return B[a[354]][a[470]].Jc
+            // // return B["state"]["options"].Jc
+            // return B[a[354]][a[470]].Jc
+            return 195944
         },
-        a: u
+       "a": "NUMBER"
     }
-}
+  }
+
 
 function Mb(d) {
     if (null === d || d.length === b[11])
