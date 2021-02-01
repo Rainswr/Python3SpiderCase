@@ -110,7 +110,7 @@ class YiDunecard:
             threshold = (rig + lef) / 2
             if threshold < 0:
                 print('Error threshold')
-                return 0
+                return 80
             loc = np.where(res >= threshold)
             if len(loc[1]) > 1:
                 lef += (rig - lef) / 2
@@ -119,6 +119,7 @@ class YiDunecard:
                 return int(loc[1][0])
             elif len(loc[1]) < 1:
                 rig -= (rig - lef) / 2
+        return 80
 
     @staticmethod
     def get_x_list(distance):
