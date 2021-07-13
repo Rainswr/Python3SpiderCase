@@ -9,6 +9,7 @@ from Crypto.Cipher import DES3
 from Crypto.Cipher import DES
 from pyDes import des, CBC, ECB, PAD_PKCS5
 import rsa
+from binascii import b2a_hex
 
 
 class EnDecryptPublicFunction:
@@ -236,7 +237,7 @@ class PyDesUtil:
 class RsaUtil:
 
     @staticmethod
-    def rsa_encrypt_text(public_key, decrypt_text: str) -> str:
+    def rsa_encrypt_text1(public_key, decrypt_text: str) -> str:
         """
         RSA加密
         :param public_key:  公钥
@@ -246,6 +247,33 @@ class RsaUtil:
         encrypt_text = rsa.encrypt(decrypt_text.encode('utf-8'), rsa.PublicKey.load_pkcs1(public_key))
         encrypt_text = base64.b64encode(encrypt_text).decode()
         return encrypt_text
+
+    @staticmethod
+    def rsa_encrypt_text2(public_key, _text: str) -> str:
+        """
+        RSA加密，针对setPublicKey
+        :param public_key:  公钥
+        :param _text: 明文
+        :return: 加密后的数据
+        """
+        encrypt_text = rsa.encrypt(_text.encode('utf-8'), rsa.PublicKey.load_pkcs1_openssl_pem(public_key))
+        encrypt_text = base64.b64encode(encrypt_text).decode()
+        return encrypt_text
+
+    @staticmethod
+    def rsa_encrypt_text3(key, _text: str):
+        """
+        RSA加密，针对new RSAKeyPair
+        import rsa
+        from binascii import b2a_hex
+        :param key: 公钥的参数
+        :param _text: 待加密的明文
+        :return: 加密后的数据
+        """
+        e = int('010001', 16)
+        n = int(key, 16)
+        pub_key = rsa.PublicKey(e=e, n=n)
+        return b2a_hex(rsa.encrypt(_text.encode(), pub_key)).decode()
 
     @staticmethod
     def rsa_decrypt_text(private_key, encrypt_text: str) -> str:
@@ -374,7 +402,7 @@ if __name__ == "__main__":
     MIGJAoGBANkDMlvSfrZaowpBQUF0gFRzwt3w0q4rWet33FdWuq39TBdCVicy4Zzw zX5ziuFExkdwbVrhEHBRkGNBJYVJ/1F1gAwd3KdyaId5NwATFkkLyM3wOtFqttwm o888U9KwIyhGH2bFkRIsk+KQmNQIR1m8Fgpdsy2JbnLd559HpTZZAgMBAAE= 
     -----END RSA PUBLIC KEY----- '''
     decrypt_str = "nihao@456"
-    encrypt_str = _object.rsa_encrypt_text(publicKey, decrypt_str)
+    encrypt_str = _object.rsa_encrypt_text1(publicKey, decrypt_str)
     print(f"RSA加密: {encrypt_str}")
     decrypt_str = _object.rsa_decrypt_text(privateKey, encrypt_str)
     print(f"RSA解密: {decrypt_str}")
@@ -382,6 +410,15 @@ if __name__ == "__main__":
     print(f"RSA签名: {sign}")
     verify_sign = _object.rsa_verify(sign, publicKey, decrypt_str)
     print(f"RSA验签: {verify_sign}")
+    public_key = """
+    -----BEGIN PUBLIC KEY-----
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDnJUXorWKGZEpLjgP9Aado78y8LwNiAqJNXkxLC0I5/rtnLmz8DuMgjxRVL+5iBeZ5a/Qm0zOOWd5/IJNLwZ6iAqX3NTxMuioAzaxXQWuhrgVJ+cxhWKuJGe1bsaPIUS+Py79a20FolQN+xT8Lf9aCTk9HdhjOd27LbX5DqwmO/wIDAQAB
+    -----END PUBLIC KEY-----"""
+    encrypt_str = _object.rsa_encrypt_text2(public_key, "12242")
+    print(f"RSA加密: setPublicKey 加密{encrypt_str}")
+    key = "978C0A92D2173439707498F0944AA476B1B62595877DD6FA87F6E2AC6DCB3D0BF0B82857439C99B5091192BC134889DFF60C562EC54EFBA4FF2F9D55ADBCCEA4A2FBA80CB398ED501280A007C83AF30C3D1A142D6133C63012B90AB26AC60C898FB66EDC3192C3EC4FF66925A64003B72496099F4F09A9FB72A2CF9E4D770C41"
+    encrypt_str = _object.rsa_encrypt_text3(key, "12242")
+    print(f"RSA加密: new RSAKeyPair 加密{encrypt_str}")
 
     print("+++++++++++++++++++++++++=======================================================")
     _object = Base64Md5Sha1HmacUtil()
