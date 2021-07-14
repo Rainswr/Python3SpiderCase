@@ -9,7 +9,7 @@ from Crypto.Cipher import DES3
 from Crypto.Cipher import DES
 from pyDes import des, CBC, ECB, PAD_PKCS5
 import rsa
-from binascii import b2a_hex
+from binascii import b2a_hex, a2b_hex
 
 
 class EnDecryptPublicFunction:
@@ -85,13 +85,14 @@ class Base64Md5Sha1HmacUtil:
 class AesUtil:
 
     @staticmethod
-    def aes_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
+    def aes_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC", method="base64") -> str:
         """
         AES加密
         :param decrypt_text: 明文
         :param key: 密钥
         :param model: 加密模式： CBC, ECB
         :param iv: 密钥偏移量，只有CBC模式有
+        :param method: 用base64加密还是16进制字符串
         :return: 密文
         """
         if model == 'CBC':
@@ -99,37 +100,44 @@ class AesUtil:
         else:
             aes = AES.new(key.encode('utf-8'), AES.MODE_ECB)
         encrypt_text = aes.encrypt(pad(decrypt_text.encode('utf-8'), AES.block_size, style='pkcs7'))
-        encrypt_text = base64.b64encode(encrypt_text).decode()
-        return encrypt_text
+        if method == "base64":
+            return base64.b64encode(encrypt_text).decode()
+        else:
+            return b2a_hex(encrypt_text).decode()
 
     @staticmethod
-    def aes_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC") -> str:
+    def aes_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC", method="base64") -> str:
         """
         AES解密
         :param encrypt_text: 密文
         :param key: 密钥
         :param model: 解密模式： CBC, ECB
         :param iv: 密钥偏移量，只有CBC模式有
+        :param method: 用base64解密还是16进制字符串
         :return:解密后的数据
         """
         if model == 'CBC':
             aes = AES.new(key.encode('utf-8'), AES.MODE_CBC, iv.encode('utf-8'))
         else:
             aes = AES.new(key.encode('utf-8'), AES.MODE_ECB)
-        decrypt_text = aes.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        if method == "base64":
+            decrypt_text = aes.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        else:
+            decrypt_text = aes.decrypt(a2b_hex(encrypt_text)).decode('utf8')
         return EnDecryptPublicFunction.clean_char(decrypt_text)
 
 
 class DesUtil:
 
     @staticmethod
-    def des_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
+    def des_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC", method="base64") -> str:
         """
         DES加密
         :param decrypt_text: 明文
         :param key: 密钥
         :param model: 加密模式： CBC, ECB
         :param iv: 密钥偏移量
+        :param method: 用base64加密还是16进制字符串
         :return: 加密后的数据
         """
         if model == 'CBC':
@@ -137,37 +145,44 @@ class DesUtil:
         else:
             des_obj = des(key[:8].encode('utf-8'), ECB, padmode=PAD_PKCS5)
         encrypt_text = des_obj.encrypt(decrypt_text.encode('utf-8'))
-        encrypt_text = base64.b64encode(encrypt_text).decode()
-        return encrypt_text
+        if method == "base64":
+            return base64.b64encode(encrypt_text).decode()
+        else:
+            return b2a_hex(encrypt_text).decode()
 
     @staticmethod
-    def des_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC") -> str:
+    def des_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC", method="base64") -> str:
         """
         DES解密
         :param encrypt_text: 密文
         :param key: 秘钥
         :param model: 解密模式： CBC, ECB
         :param iv:秘钥偏移量
+        :param method: 用base64解密还是16进制字符串
         :return:解密后的数据
         """
         if model == 'CBC':
             des_obj = des(key[:8].encode('utf-8'), CBC, iv.encode('utf-8'), padmode=PAD_PKCS5)
         else:
             des_obj = des(key[:8].encode('utf-8'), ECB, padmode=PAD_PKCS5)
-        decrypt_text = des_obj.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        if method == "base64":
+            decrypt_text = des_obj.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        else:
+            decrypt_text = des_obj.decrypt(a2b_hex(encrypt_text)).decode('utf8')
         return EnDecryptPublicFunction.clean_char(decrypt_text)
 
 
 class Des3Util:
 
     @staticmethod
-    def des3_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
+    def des3_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC", method="base64") -> str:
         """
         DES3加密
         :param decrypt_text: 明文
         :param key: 密钥
         :param model: 加密模式： CBC, ECB
         :param iv: 密钥偏移量
+        :param method: 用base64加密还是16进制字符串
         :return: 加密后的数据
         """
         if model == 'CBC':
@@ -175,37 +190,44 @@ class Des3Util:
         else:
             des3 = DES3.new(key.encode('utf-8'), DES3.MODE_ECB)
         encrypt_text = des3.encrypt(pad(decrypt_text.encode('utf-8'), DES3.block_size, style='pkcs7'))
-        encrypt_text = base64.b64encode(encrypt_text).decode()
-        return encrypt_text
+        if method == "base64":
+            return base64.b64encode(encrypt_text).decode()
+        else:
+            return b2a_hex(encrypt_text).decode()
 
     @staticmethod
-    def des3_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC") -> str:
+    def des3_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC", method="base64") -> str:
         """
         DES3解密
         :param encrypt_text: 密文
         :param key: 秘钥
         :param model: 解密模式： CBC, ECB
         :param iv:秘钥偏移量
+        :param method: 用base64解密还是16进制字符串
         :return:解密后的数据
         """
         if model == 'CBC':
             des3 = DES3.new(key.encode('utf-8'), DES3.MODE_CBC, iv[:8].encode('utf-8'))
         else:
             des3 = DES3.new(key.encode('utf-8'), DES3.MODE_ECB)
-        decrypt_text = des3.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        if method == "base64":
+            decrypt_text = des3.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        else:
+            decrypt_text = des3.decrypt(a2b_hex(encrypt_text)).decode('utf8')
         return EnDecryptPublicFunction.clean_char(decrypt_text)
 
 
 class PyDesUtil:
 
     @staticmethod
-    def des_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC") -> str:
+    def des_encrypt_text(decrypt_text: str, key: str, iv="", model="CBC", method="base64") -> str:
         """
         DES加密
         :param decrypt_text: 明文
         :param key: 密钥
         :param model: 加密模式： CBC, ECB
         :param iv: 密钥偏移量
+        :param method: 用base64加密还是16进制字符串
         :return: 加密后的数据
         """
         if model == 'CBC':
@@ -213,77 +235,97 @@ class PyDesUtil:
         else:
             des_obj = DES.new(key[:8].encode('utf-8'), DES.MODE_ECB)
         encrypt_text = des_obj.encrypt(pad(decrypt_text.encode('utf-8'), DES3.block_size, style='pkcs7'))
-        encrypt_text = base64.b64encode(encrypt_text).decode()
-        return encrypt_text
+        if method == "base64":
+            return base64.b64encode(encrypt_text).decode()
+        else:
+            return b2a_hex(encrypt_text).decode()
 
     @staticmethod
-    def des_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC") -> str:
+    def des_decrypt_text(encrypt_text: str, key: str, iv="", model="CBC", method="base64") -> str:
         """
         DES解密
         :param encrypt_text: 密文
         :param key: 秘钥
         :param model: 解密模式： CBC, ECB
         :param iv:秘钥偏移量
+        :param method: 用base64解密还是16进制字符串
         :return:解密后的数据
         """
         if model == 'CBC':
             des_obj = DES.new(key[:8].encode('utf-8'), DES.MODE_CBC, iv.encode('utf-8'))
         else:
             des_obj = DES.new(key[:8].encode('utf-8'), DES.MODE_ECB)
-        decrypt_text = des_obj.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        if method == "base64":
+            decrypt_text = des_obj.decrypt(base64.b64decode(encrypt_text)).decode('utf8')
+        else:
+            decrypt_text = des_obj.decrypt(a2b_hex(encrypt_text)).decode('utf8')
         return EnDecryptPublicFunction.clean_char(decrypt_text)
 
 
 class RsaUtil:
 
     @staticmethod
-    def rsa_encrypt_text1(public_key, decrypt_text: str) -> str:
+    def rsa_encrypt_text1(public_key, decrypt_text: str, method="base64") -> str:
         """
         RSA加密
         :param public_key:  公钥
         :param decrypt_text: 明文
+        :param method: 用base64加密还是16进制字符串
         :return: 加密后的数据
         """
         encrypt_text = rsa.encrypt(decrypt_text.encode('utf-8'), rsa.PublicKey.load_pkcs1(public_key))
-        encrypt_text = base64.b64encode(encrypt_text).decode()
-        return encrypt_text
+        if method == "base64":
+            return base64.b64encode(encrypt_text).decode()
+        else:
+            return b2a_hex(encrypt_text).decode()
 
     @staticmethod
-    def rsa_encrypt_text2(public_key, _text: str) -> str:
+    def rsa_encrypt_text2(public_key, _text: str, method="base64") -> str:
         """
         RSA加密，针对setPublicKey
         :param public_key:  公钥
         :param _text: 明文
+        :param method: 用base64加密还是16进制字符串
         :return: 加密后的数据
         """
         encrypt_text = rsa.encrypt(_text.encode('utf-8'), rsa.PublicKey.load_pkcs1_openssl_pem(public_key))
-        encrypt_text = base64.b64encode(encrypt_text).decode()
-        return encrypt_text
+        if method == "base64":
+            return base64.b64encode(encrypt_text).decode()
+        else:
+            return b2a_hex(encrypt_text).decode()
 
     @staticmethod
-    def rsa_encrypt_text3(key, _text: str):
+    def rsa_encrypt_text3(key, _text: str, method="base64"):
         """
         RSA加密，针对new RSAKeyPair
         import rsa
         from binascii import b2a_hex
         :param key: 公钥的参数
         :param _text: 待加密的明文
+        :param method: 用base64加密还是16进制字符串
         :return: 加密后的数据
         """
         e = int('010001', 16)
         n = int(key, 16)
         pub_key = rsa.PublicKey(e=e, n=n)
-        return b2a_hex(rsa.encrypt(_text.encode(), pub_key)).decode()
+        encrypt_text = rsa.encrypt(_text.encode(), pub_key)
+        if method == "base64":
+            return base64.b64encode(encrypt_text).decode()
+        else:
+            return b2a_hex(encrypt_text).decode()
 
     @staticmethod
-    def rsa_decrypt_text(private_key, encrypt_text: str) -> str:
+    def rsa_decrypt_text(private_key, encrypt_text: str, method="base64") -> str:
         """
         RSA解密
         :param private_key: 私钥
         :param encrypt_text: 密文
         :return: 明文
         """
-        decrypt_text = rsa.decrypt(base64.b64decode(encrypt_text), rsa.PrivateKey.load_pkcs1(private_key)).decode('utf8')
+        if method == "base64":
+            decrypt_text = rsa.decrypt(base64.b64decode(encrypt_text), rsa.PrivateKey.load_pkcs1(private_key)).decode('utf8')
+        else:
+            decrypt_text = rsa.decrypt(a2b_hex(encrypt_text), rsa.PrivateKey.load_pkcs1(private_key)).decode('utf8')
         return decrypt_text
 
     @staticmethod
@@ -417,7 +459,7 @@ if __name__ == "__main__":
     encrypt_str = _object.rsa_encrypt_text2(public_key, "12242")
     print(f"RSA加密: setPublicKey 加密{encrypt_str}")
     key = "978C0A92D2173439707498F0944AA476B1B62595877DD6FA87F6E2AC6DCB3D0BF0B82857439C99B5091192BC134889DFF60C562EC54EFBA4FF2F9D55ADBCCEA4A2FBA80CB398ED501280A007C83AF30C3D1A142D6133C63012B90AB26AC60C898FB66EDC3192C3EC4FF66925A64003B72496099F4F09A9FB72A2CF9E4D770C41"
-    encrypt_str = _object.rsa_encrypt_text3(key, "12242")
+    encrypt_str = _object.rsa_encrypt_text3(key, "12242", 'hex')
     print(f"RSA加密: new RSAKeyPair 加密{encrypt_str}")
 
     print("+++++++++++++++++++++++++=======================================================")
